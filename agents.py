@@ -1,4 +1,6 @@
+import os
 import re
+import streamlit as st
 from langchain.agents import create_agent
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
@@ -7,6 +9,15 @@ from tools import web_search, scrape_url
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Streamlit Cloud secrets -> environment variables
+for k in ("GROQ_API_KEY", "TAVILY_API_KEY", "OPENAI_API_KEY"):
+    if not os.environ.get(k) and k in st.secrets:
+        os.environ[k] = st.secrets[k]
+
+if not os.environ.get("GROQ_API_KEY"):
+    st.error(f"GROQ_API_KEY missing. Secrets me ye keys mili: {list(st.secrets.keys())}")
+    st.stop()
 
 # model setup
 llm = ChatGroq(
